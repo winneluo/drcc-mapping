@@ -1,0 +1,311 @@
+setwd("~/Documents/DRCC_ELCP")
+library(htmlwidgets)
+library(sf)
+library(dplyr)
+library(stringr)
+library(leaflet)
+library(readr)
+
+life_expectancy <- read_csv('./Data/life_expectancy_data_zip.csv')
+children_hospitalization <- read_csv('./Data/asthma_hosp_rate_under18yrsold.csv')
+life_expectancy_county <- read_csv('./Data/life_expectancy_king_county.csv')
+
+names(life_expectancy)[names(life_expectancy) == 'Zipcode'] <- 'GEOID20'
+names(life_expectancy)[names(life_expectancy) == 'Estimate'] <- 'life_expect_est'
+names(life_expectancy)[names(life_expectancy) == 'Lower CI'] <- 'life_expect_lowerci'
+names(life_expectancy)[names(life_expectancy) == 'Upper CI'] <- 'life_expect_upperci'
+
+
+names(children_hospitalization)[names(children_hospitalization) == 'ZIP'] <- 'GEOID20'
+names(children_hospitalization)[names(children_hospitalization) == 'Rate per 10K people'] <- 'children_asthma_hosp_rateper10k'
+names(children_hospitalization)[names(children_hospitalization) == 'Rate per 100k People'] <- 'children_asthma_hosp_rateper100k'
+names(children_hospitalization)[names(children_hospitalization) == 'CI Lower'] <- 'children_asthma_hosp_lowerci'
+names(children_hospitalization)[names(children_hospitalization) == 'CI Upper'] <- 'children_asthma_hosp_upperci'
+names(children_hospitalization)[names(children_hospitalization) == 'Population'] <- 'children_asthma_hosp_pop'
+
+
+life_expectancy_tract$GEOID <- as.character(life_expectancy_tract$GEOID)
+life_expectancy$GEOID20 <- as.character(life_expectancy$GEOID20)
+children_hospitalization$GEOID20 <- as.character(children_hospitalization$GEOID20)
+
+
+# Read census tract shapefile
+zip <- st_read("./Data/tl_2026_us_zcta520/tl_2026_us_zcta520.shp")
+tracts <- st_read("./Data/tl_2026_53_tract/tl_2026_53_tract.shp") |>  st_transform(4326)
+
+
+
+# Join health data to census tract boundaries
+map_data <- zip |>
+  inner_join(children_hospitalization, by = "GEOID20") |>
+  full_join(life_expectancy, by= "GEOID20") |>
+  st_transform(4326)
+
+map_data$ZCTA5CE20 <- as.numeric(map_data$ZCTA5CE20)
+map_data <- map_data %>% select(where(is.numeric))
+
+
+
+
+
+# Life expectancy color palette
+pal_life <- colorNumeric(
+  palette = "YlOrRd",
+  domain = map_data$life_expectancy,
+  na.color = "#cccccc"
+)
+
+
+# Asthma color palette
+pal_asthma <- colorNumeric(
+  palette = "YlOrRd",
+  domain = map_data$children_asthma_hosp_rateper100k,
+  na.color = "#cccccc"
+)
+
+# Interactive Map
+# Filter asthma data to one observation per ZCTA
+# Adjust these filters to match your dataset
+
+# Palettes
+pal_asthma <- colorNumeric(
+  palette = "YlOrRd",
+  domain = map_data$children_asthma_hosp_rateper100k,
+  na.color = "#cccccc"
+)
+
+# Reversed palette: higher life expectancy = darker purple
+pal_life <- colorNumeric(
+  palette = rev(hcl.colors(9, "Purples")),
+  domain = map_data$life_expect_est,
+  na.color = "#cccccc"
+)
+
+m <- leaflet(map_data) |>
+  addTiles() |>
+  
+  # Asthma layer
+  addPolygons(
+    group = "Asthma",
+    fillColor = ~pal_asthma(children_asthma_hosp_rateper100k),
+    fillOpacity = 0.75,
+    color = "white",
+    weight = 1,
+    popup = ~paste0(
+      "<b>ZIP:</b> ", ZCTA5CE20,
+      "<br><b>Asthma hospitalization rate in children:</b> ",
+      round(children_asthma_hosp_rateper100k, 1),
+      " per 100,000 people"
+    )
+  ) |>
+  
+  # Life expectancy layer
+  addPolygons(
+    group = "Life Expectancy",
+    fillColor = ~pal_life(life_expect_est),
+    fillOpacity = 0.75,
+    color = "white",
+    weight = 1,
+    popup = ~paste0(
+      "<b>ZIP:</b> ", ZCTA5CE20,
+      "<br><b>Life expectancy:</b> ",
+      round(life_expect_est, 1),
+      " years"
+    )
+  ) |>
+  
+  # Legends with distinct IDs
+  addLegend(
+    position = "bottomright",
+    pal = pal_asthma,
+    values = ~children_asthma_hosp_rateper100k,
+    title = "Asthma hospitalizations<br>per 100,000",
+    layerId = "legend_asthma"
+  ) |>
+  
+  addLegend(
+    position = "bottomright",
+    pal = pal_life,
+    values = ~life_expect_est,
+    title = "Life expectancy (years)",
+    layerId = "legend_life"
+  ) |>
+  
+  # Layer selector
+  addLayersControl(
+    baseGroups = c("Asthma", "Life Expectancy"),
+    options = layersControlOptions(collapsed = FALSE)
+  ) |>
+  
+  # Reliably toggle the legends
+  onRender("
+    function(el, x) {
+      var map = this;
+
+      function toggleLegends(active) {
+        var controls = el.querySelectorAll('.leaflet-control');
+
+        controls.forEach(function(control) {
+          var asthma = control.querySelector('#legend_asthma');
+          var life = control.querySelector('#legend_life');
+
+          if (asthma) {
+            control.style.display =
+              active === 'Asthma' ? '' : 'none';
+          }
+
+          if (life) {
+            control.style.display =
+              active === 'Life Expectancy' ? '' : 'none';
+          }
+        });
+      }
+
+      toggleLegends('Asthma');
+
+      map.on('baselayerchange', function(e) {
+        toggleLegends(e.name);
+      });
+    }
+  ")
+
+saveRDS(
+  map_data,
+  "map_data.rds"
+)
+
+################################################### Census tracts
+
+life_expectancy_tract <- read_csv('./Data/life_expectancy_data_tract.csv')
+names(life_expectancy_tract)[names(life_expectancy_tract) == 'Lower CI'] <- 'life_expect_lowerci'
+names(life_expectancy_tract)[names(life_expectancy_tract) == 'Upper CI'] <- 'life_expect_upperci'
+names(life_expectancy_tract)[names(life_expectancy_tract) == 'Tract'] <- 'GEOID'
+names(life_expectancy_tract)[names(life_expectancy_tract) == 'Estimate'] <- 'life_expect_est'
+
+life_expectancy_tract_23 <- life_expectancy_tract %>% filter(Year == "2020-2023")
+
+life_expectancy_county <- read_csv('./Data/life_expectancy_county.csv')
+king_county_life_expectancy <-
+  life_expectancy_county$life_expectancy_king_county[[2]]
+
+king_county <- st_read("./Data/king_county_shp/King_County_Political_Boundary_(no_waterbodies).shp") |>
+  st_make_valid() |>
+  st_transform(4326) |>
+  summarise(geometry = st_union(geometry))
+king_county <- king_county |>
+  mutate(
+    king_county_le = king_county_life_expectancy
+  )
+
+tracts_local <- tracts |>
+  mutate(
+    GEOID20 = str_pad(
+      as.character(GEOID),
+      width = 11,
+      side = "left",
+      pad = "0"
+    )
+  ) |>
+  left_join(
+    life_expectancy_tract_23,
+    by = "GEOID"
+  ) |>
+  filter(!is.na(life_expect_est))
+
+tracts_local
+
+# Combine values to establish a shared color scale
+life_values <- c(
+  tracts_local$life_expect_est,
+  king_county_life_expectancy
+)
+
+# Create palette
+pal_life <- colorNumeric(
+  palette = "Purples",
+  domain = life_values,
+  na.color = "#cccccc"
+)
+
+
+# Get bounds of neighborhood census tracts
+tract_bbox <- st_bbox(tracts_local)
+
+# Create map
+life_map <- leaflet() |>
+  addTiles() |>
+  
+  # King County comparison layer
+  addPolygons(
+    data = king_county,
+    fillColor = ~pal_life(king_county_life_expectancy),
+    fillOpacity = 0.7,
+    color = "#333333",
+    weight = 2,
+    popup = ~paste0(
+      "<b>King County life expectancy:</b> ",
+      round(king_county_life_expectancy, 1),
+      " years"
+    )
+  ) |>
+  
+  # Georgetown and South Park census tract layer
+  addPolygons(
+    data = tracts_local,
+    fillColor = ~pal_life(life_expect_est),
+    fillOpacity = 1,
+    color = "white",
+    weight = 1.5,
+    
+    popup = ~paste0(
+      "<b>Census tract:</b> ", `Geography Name`,
+      "<br><b>Life expectancy:</b> ",
+      round(life_expect_est, 1),
+      " years"
+    ),
+    
+    highlightOptions = highlightOptions(
+      weight = 3,
+      color = "#333333",
+      bringToFront = TRUE
+    )
+  ) |>
+  
+  # Shared legend
+  addLegend(
+    position = "bottomright",
+    pal = pal_life,
+    values = life_values,
+    title = "Life expectancy (years)",
+    opacity = 1
+  ) |>
+  
+  # King County benchmark information box
+  addControl(
+    html = paste0(
+      "<div style='background:white; padding:10px 14px; ",
+      "border-radius:5px; box-shadow:0 1px 5px rgba(0,0,0,0.3);'>",
+      "<b>King County comparison</b><br>",
+      round(king_county_life_expectancy, 1),
+      " years",
+      "</div>"
+    ),
+    position = "topright"
+  ) |>
+  
+  # Zoom to Georgetown and South Park
+  fitBounds(
+    lng1 = as.numeric(tract_bbox["xmin"]),
+    lat1 = as.numeric(tract_bbox["ymin"]),
+    lng2 = as.numeric(tract_bbox["xmax"]),
+    lat2 = as.numeric(tract_bbox["ymax"])
+  )
+
+life_map
+
+
+saveRDS(
+  tracts_local,
+  "tracts_local.rds"
+)
+

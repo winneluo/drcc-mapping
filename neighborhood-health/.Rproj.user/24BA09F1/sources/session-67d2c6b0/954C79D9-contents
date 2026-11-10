@@ -1,0 +1,216 @@
+---
+title: "Neighborhood Health Explorer"
+format: html
+editor: visual
+---
+
+## Explore neighborhood health data
+
+This website explores data around the Duwamish River. Use the layer selector to switch between maps; each map's legend appears only while it is selected.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(sf)
+library(leaflet)
+library(htmlwidgets)
+
+# ---- Load data -------------------------------------------------------------
+#map_data    <- readRDS("map_data.rds")
+#tracts_local <- readRDS("tracts_local.rds")
+
+# NOTE: `king_county` (sf polygon) and `king_county_life_expectancy` (number)
+# were used in the original file but are not in the uploaded .rds files.
+# Load or define them here, e.g.:
+# king_county <- readRDS("king_county.rds")
+# king_county_life_expectancy <- 81.0   # <- replace with your value
+
+# Leaflet needs WGS84 lon/lat
+map_data     <- st_transform(map_data, 4326)
+tracts_local <- st_transform(tracts_local, 4326)
+king_county  <- st_transform(king_county, 4326)
+
+# ---- Palettes --------------------------------------------------------------
+pal_asthma <- colorNumeric(
+  palette = "YlOrRd",
+  domain = map_data$children_asthma_hosp_rateper100k,
+  na.color = "#cccccc"
+)
+
+pal_life <- colorNumeric(
+  palette = rev(hcl.colors(9, "Purples")),
+  domain = map_data$life_expect_est,
+  na.color = "#cccccc"
+)
+
+# Tract map shares one color scale with the King County benchmark
+life_values <- c(tracts_local$life_expect_est, king_county_life_expectancy)
+pal_life_tract <- colorNumeric(
+  palette = "Purples",
+  domain = life_values,
+  na.color = "#cccccc"
+)
+
+# King County asthma benchmark
+king_county_rate <- 37.2
+
+# ---- Bounds (used for initial view and when switching layers) --------------
+bb_zip   <- st_bbox(map_data)
+bb_tract <- st_bbox(tracts_local)
+
+bounds_zip   <- list(lng1 = unname(bb_zip["xmin"]),   lat1 = unname(bb_zip["ymin"]),
+                     lng2 = unname(bb_zip["xmax"]),   lat2 = unname(bb_zip["ymax"]))
+bounds_tract <- list(lng1 = unname(bb_tract["xmin"]-0.05), lat1 = unname(bb_tract["ymin"]-0.05),
+                     lng2 = unname(bb_tract["xmax"]+0.05), lat2 = unname(bb_tract["ymax"]+0.05))
+
+# ---- Combined map ----------------------------------------------------------
+leaflet() |>
+  addTiles() |>
+
+  # 1. Childhood asthma hospitalization rate (ZIP)
+  addPolygons(
+    data = map_data,
+    group = "Asthma",
+    fillColor = ~pal_asthma(children_asthma_hosp_rateper100k),
+    fillOpacity = 0.75,
+    color = "white",
+    weight = 1,
+    popup = ~paste0(
+      "<b>ZIP Code:</b> ", ZCTA5CE20,
+      "<br><b>Childhood asthma hospitalization rate:</b> ",
+      round(children_asthma_hosp_rateper100k, 1), " per 100,000",
+      "<br><b>King County comparison:</b> 37.2 per 100,000",
+      "<br><b>Difference from county rate:</b> ",
+      ifelse(
+        is.na(children_asthma_hosp_rateper100k),
+        "Not available",
+        paste0(
+          ifelse(children_asthma_hosp_rateper100k - king_county_rate > 0, "+", ""),
+          round(children_asthma_hosp_rateper100k - king_county_rate, 1),
+          " per 100,000"
+        )
+      )
+    )
+  ) |>
+
+  # 2. Life expectancy (ZIP)
+  addPolygons(
+    data = map_data,
+    group = "Life Expectancy",
+    fillColor = ~pal_life(life_expect_est),
+    fillOpacity = 0.75,
+    color = "white",
+    weight = 1,
+    popup = ~paste0(
+      "<b>ZIP Code:</b> ", ZCTA5CE20,
+      "<br><b>Life expectancy:</b> ", round(life_expect_est, 1), " years"
+    )
+  ) |>
+
+  # 3. Life expectancy: Georgetown & South Park tracts vs. King County
+  addPolygons(
+    data = king_county,
+    group = "Life Expectancy (Tracts)",
+    fillColor = ~pal_life_tract(king_county_life_expectancy),
+    fillOpacity = 0.7,
+    color = "#333333",
+    weight = 2,
+    popup = ~paste0(
+      "<b>King County life expectancy:</b> ",
+      round(king_county_life_expectancy, 1), " years"
+    )
+  ) |>
+  addPolygons(
+    data = tracts_local,
+    group = "Life Expectancy (Tracts)",
+    fillColor = ~pal_life_tract(life_expect_est),
+    fillOpacity = 1,
+    color = "white",
+    weight = 1.5,
+    popup = ~paste0(
+      "<b>Census tract:</b> ", `Geography Name`,
+      "<br><b>Life expectancy:</b> ", round(life_expect_est, 1), " years"
+    ),
+    highlightOptions = highlightOptions(
+      weight = 3, color = "#333333", bringToFront = TRUE
+    )
+  ) |>
+
+  # Legends: each gets its own CSS class so JavaScript can show/hide it
+  addLegend(
+    position = "bottomright",
+    pal = pal_asthma,
+    values = map_data$children_asthma_hosp_rateper100k,
+    title = paste0(
+      "Childhood asthma hospitalizations<br>per 100,000<br>",
+      "<span style='font-size:12px;color:#333'>King County: 37.2</span>"
+    ),
+    className = "info legend legend-asthma"
+  ) |>
+  addLegend(
+    position = "bottomright",
+    pal = pal_life,
+    values = map_data$life_expect_est,
+    title = "Life expectancy (years)",
+    className = "info legend legend-life"
+  ) |>
+  addLegend(
+    position = "bottomright",
+    pal = pal_life_tract,
+    values = life_values,
+    title = "Life expectancy (years)",
+    opacity = 1,
+    className = "info legend legend-tract"
+  ) |>
+
+  # King County benchmark box (belongs to the tract map)
+  addControl(
+    html = paste0(
+      "<div style='background:white; padding:10px 14px; ",
+      "border-radius:5px; box-shadow:0 1px 5px rgba(0,0,0,0.3);'>",
+      "<b>King County comparison</b><br>",
+      round(king_county_life_expectancy, 1), " years</div>"
+    ),
+    position = "topright",
+    className = "leaflet-control legend-tract"
+  ) |>
+
+  # Layer selector
+  addLayersControl(
+    baseGroups = c("Asthma", "Life Expectancy", "Life Expectancy (Tracts)"),
+    options = layersControlOptions(collapsed = FALSE)
+  ) |>
+
+  fitBounds(bounds_zip$lng1, bounds_zip$lat1, bounds_zip$lng2, bounds_zip$lat2) |>
+
+  # Show only the legend that matches the selected layer
+  onRender(
+    "
+    function(el, x, data) {
+      var map = this;
+      var legendFor = {
+        'Asthma': 'legend-asthma',
+        'Life Expectancy': 'legend-life',
+        'Life Expectancy (Tracts)': 'legend-tract'
+      };
+
+      function showLegend(layerName) {
+        Object.keys(legendFor).forEach(function(name) {
+          var items = el.querySelectorAll('.' + legendFor[name]);
+          items.forEach(function(item) {
+            item.style.display = (name === layerName) ? '' : 'none';
+          });
+        });
+      }
+
+      // Initial state: first base layer (Asthma) is selected
+      showLegend('Asthma');
+
+      map.on('baselayerchange', function(e) {
+        showLegend(e.name);
+        var b = (e.name === 'Life Expectancy (Tracts)') ? data.tract : data.zip;
+        map.fitBounds([[b.lat1, b.lng1], [b.lat2, b.lng2]]);
+      });
+    }
+    ",
+    data = list(zip = bounds_zip, tract = bounds_tract)
+  )
+```

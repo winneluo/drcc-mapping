@@ -1,0 +1,211 @@
+---
+title: "Neighborhood Health Explorer"
+format: html
+editor: visual
+---
+
+## Explore neighborhood health data
+
+This website explores data around the Duwamish River.
+
+```{r, echo=FALSE, resize.width=200, resize.height= 200}
+
+library(sf)
+library(leaflet)
+library(htmlwidgets)
+
+# Color palettes
+pal_asthma <- colorNumeric(
+  palette = "YlOrRd",
+  domain = map_data$children_asthma_hosp_rateper100k,
+  na.color = "#cccccc"
+)
+
+# Reversed purple palette for life expectancy
+pal_life <- colorNumeric(
+  palette = rev(hcl.colors(9, "Purples")),
+  domain = map_data$life_expect_est,
+  na.color = "#cccccc"
+)
+
+# King County benchmark
+king_county_rate <- 37.2
+
+leaflet(map_data) |>
+  addTiles() |>
+  
+  # Childhood asthma hospitalization rate
+  addPolygons(
+    group = "Asthma",
+    fillColor = ~pal_asthma(children_asthma_hosp_rateper100k),
+    fillOpacity = 0.75,
+    color = "white",
+    weight = 1,
+    popup = ~paste0(
+      "<b>ZIP Code:</b> ", ZCTA5CE20,
+      "<br><b>Childhood asthma hospitalization rate:</b> ",
+      round(children_asthma_hosp_rateper100k, 1),
+      " per 100,000",
+      "<br><b>King County comparison:</b> 37.2 per 100,000",
+      "<br><b>Difference from county rate:</b> ",
+      ifelse(
+        is.na(children_asthma_hosp_rateper100k),
+        "Not available",
+        paste0(
+          ifelse(
+            children_asthma_hosp_rateper100k - king_county_rate > 0,
+            "+", ""
+          ),
+          round(
+            children_asthma_hosp_rateper100k - king_county_rate, 1
+          ),
+          " per 100,000"
+        )
+      )
+    )
+  ) |>
+  
+  # Life expectancy
+  addPolygons(
+    group = "Life Expectancy",
+    fillColor = ~pal_life(life_expect_est),
+    fillOpacity = 0.75,
+    color = "white",
+    weight = 1,
+    popup = ~paste0(
+      "<b>ZIP Code:</b> ", ZCTA5CE20,
+      "<br><b>Life expectancy:</b> ",
+      round(life_expect_est, 1), " years"
+    )
+  ) |>
+  
+  # Asthma legend, including county comparison
+  addLegend(
+    position = "bottomright",
+    pal = pal_asthma,
+    values = ~children_asthma_hosp_rateper100k,
+    title = paste0(
+      "Childhood asthma hospitalizations<br>",
+      "per 100,000<br>",
+      "<span style='font-size:12px;color:#333'>",
+      "King County: 37.2"
+    ),
+    group = "Asthma"
+  ) |>
+  
+  # Life expectancy legend
+  addLegend(
+    position = "bottomright",
+    pal = pal_life,
+    values = ~life_expect_est,
+    title = "Life expectancy (years)",
+    group = "Life Expectancy"
+  ) |>
+  
+  # Layer selector
+  addLayersControl(
+    baseGroups = c("Asthma", "Life Expectancy"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+
+```
+
+```{r}
+
+# King County benchmark value (used for the info box)
+kc_le <- king_county_life_expectancy
+
+
+# Combine values to establish a shared color scale
+life_values <- c(
+  tracts_local$life_expect_est,
+  king_county_life_expectancy
+)
+
+
+# Create palette
+pal_life <- colorNumeric(
+  palette = "Purples",
+  domain = life_values,
+  na.color = "#cccccc"
+)
+
+
+# Get bounds of neighborhood census tracts
+tract_bbox <- st_bbox(tracts_local)
+
+# Create map
+life_map <- leaflet() |>
+  addTiles() |>
+  
+  # King County comparison layer
+  addPolygons(
+    data = king_county,
+    fillColor = ~pal_life(king_county_life_expectancy),
+    fillOpacity = 0.7,
+    color = "#333333",
+    weight = 2,
+    popup = ~paste0(
+      "<b>King County life expectancy:</b> ",
+      round(king_county_life_expectancy, 1),
+      " years"
+    )
+  ) |>
+  
+  # Georgetown and South Park census tract layer
+  addPolygons(
+    data = tracts_local,
+    fillColor = ~pal_life(life_expect_est),
+    fillOpacity = 1,
+    color = "white",
+    weight = 1.5,
+    
+    popup = ~paste0(
+      "<b>Census tract:</b> ", `Geography Name`,
+      "<br><b>Life expectancy:</b> ",
+      round(life_expect_est, 1),
+      " years"
+    ),
+    
+    highlightOptions = highlightOptions(
+      weight = 3,
+      color = "#333333",
+      bringToFront = TRUE
+    )
+  ) |>
+  
+  # Shared legend
+  addLegend(
+    position = "bottomright",
+    pal = pal_life,
+    values = life_values,
+    title = "Life expectancy (years)",
+    opacity = 1
+  ) |>
+  
+  # King County benchmark information box
+  addControl(
+    html = paste0(
+      "<div style='background:white; padding:10px 14px; ",
+      "border-radius:5px; box-shadow:0 1px 5px rgba(0,0,0,0.3);'>",
+      "<b>King County comparison</b><br>",
+      round(king_county_life_expectancy, 1),
+      " years",
+      "</div>"
+    ),
+    position = "topright"
+  ) |>
+  
+  # Zoom to Georgetown and South Park
+  fitBounds(
+    lng1 = as.numeric(tract_bbox["xmin"]),
+    lat1 = as.numeric(tract_bbox["ymin"]),
+    lng2 = as.numeric(tract_bbox["xmax"]),
+    lat2 = as.numeric(tract_bbox["ymax"])
+  )
+
+life_map
+```
+
+```         
+```
