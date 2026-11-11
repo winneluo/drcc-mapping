@@ -13,6 +13,7 @@ library(sf)
 library(leaflet)
 library(htmlwidgets)
 library(dplyr)
+library(readr)
 # ---- Load data -------------------------------------------------------------
 map_data    <- readRDS("map_data.rds")
 tracts_local <- readRDS("tracts_local.rds")
