@@ -17,6 +17,9 @@ library(dplyr)
 map_data    <- readRDS("map_data.rds")
 tracts_local <- readRDS("tracts_local.rds")
 
+kc_le <-
+  read_csv('./Data/life_expectancy_king_county.csv')$life_expectancy_king_county[[2]]
+
 # NOTE: `king_county` (sf polygon) and `king_county_life_expectancy` (number)
 # were used in the original file but are not in the uploaded .rds files.
 # Load or define them here, e.g.:
