@@ -1,0 +1,9 @@
+year,cat1_group,Population size,CI_lower,N,CI_Upper,life_expectancy_king_county
+2022-2024,King County, years,81,279,81.2,81.1
+2021-2023,King County, years,80.8,286,81,80.9
+2020-2022,King County, years,80.9,287,81.1,81
+2019-2021,King County, years,81.3,295,81.5,81.4
+2018-2020,King County, years,81.7,301,81.9,81.8
+2017-2019,King County, years,81.8,287,82,81.9
+2016-2018,King County, years,81.8,285,82,81.9
+2015-2017,King County, years,81.7,276,81.9,81.8

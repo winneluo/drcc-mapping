@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+	<idinfo>
+		<citation>
+			<citeinfo>
+				<origin>King County</origin>
+				<pubdate>20050923</pubdate>
+				<title>King County Political Boundary (no waterbodies)</title>
+				<edition>One</edition>
+				<geoform>vector digital data</geoform>
+				<pubinfo>
+					<pubplace>King County, WA</pubplace>
+					<publish>King County</publish>
+				</pubinfo>
+				<othercit>None</othercit>
+				<onlink>http://www5.kingcounty.gov/gisdataportal/Default.aspx</onlink>
+			</citeinfo>
+		</citation>
+		<descript>
+			<abstract>King County Political Boundary extracted from WASHCO_AREA.</abstract>
+			<purpose>Shows political boundaries for King County independent of shoreline. Useful for showing all areas of county; including water areas. Use KINGSH_AREA to depict interior political boundaries with edge-of-water shoreline.</purpose>
+			<supplinf>None</supplinf>
+		</descript>
+		<timeperd>
+			<timeinfo>
+				<sngdate>
+					<caldate>20090501</caldate>
+				</sngdate>
+			</timeinfo>
+			<current>publication date</current>
+		</timeperd>
+		<status>
+			<progress>Complete</progress>
+			<update>Irregular</update>
+		</status>
+		<spdom>
+			<bounding>
+				<westbc>-122.556096</westbc>
+				<eastbc>-121.063188</eastbc>
+				<northbc>47.788861</northbc>
+				<southbc>47.073445</southbc>
+			</bounding>
+		</spdom>
+		<keywords>
+			<theme>
+				<themekt>Not applicable</themekt>
+				<themekey>county boundaries</themekey>
+				<themekey>politicl</themekey>
+				<themekey>political</themekey>
+				<themekey>boundaries</themekey>
+				<themekey>jurisdiction</themekey>
+			</theme>
+			<theme>
+				<themekt>ISO 19115 Topic Categories</themekt>
+				<themekey>boundaries</themekey>
+			</theme>
+			<place>
+				<placekt>Not applicable</placekt>
+				<placekey>Pacific NW</placekey>
+				<placekey>Washington state</placekey>
+				<placekey>King County</placekey>
+				<placekey>WA</placekey>
+			</place>
+		</keywords>
+		<accconst>None</accconst>
+		<useconst>King County data are made available with the understanding that they shall be used exclusively by the obtainer or his/her authorized agents. Digital products may not be reproduced or redistributed in any form or by any means without the express written authorization of King County.</useconst>
+		<ptcontac>
+			<cntinfo>
+				<cntorgp>
+					<cntorg>King County GIS Center</cntorg>
+					<cntper>Mike Leathers</cntper>
+				</cntorgp>
+				<cntpos>GIS Data Coordinator</cntpos>
+				<cntaddr>
+					<addrtype>mailing and physical</addrtype>
+					<address>201 S Jackson St, Suite 706</address>
+					<city>Seattle</city>
+					<state>WA</state>
+					<postal>98104</postal>
+					<country>US</country>
+				</cntaddr>
+				<cntvoice>206-477-4403</cntvoice>
+			</cntinfo>
+		</ptcontac>
+		<browse>
+			<browsen>http://www5.kingcounty.gov/sdc/dataimages/kingco.jpg</browsen>
+			<browsed>JPG File of layer overlain on base of WA counties or local cities</browsed>
+			<browset>JPG</browset>
+		</browse>
+		<native>Esri ArcGIS 13.4.0.55405</native>
+	</idinfo>
+	<dataqual>
+		<attracc>
+			<attraccr>Selected from WASHCO_AREA. Refer to metadata for WASHCO for details.</attraccr>
+		</attracc>
+		<logic>Selected from WASHCO_AREA. Refer to metadata for WASHCO for details.</logic>
+		<complete>Selected from WASHCO_AREA. Refer to metadata for WASHCO for details.</complete>
+		<posacc>
+			<horizpa>
+				<horizpar>Selected from WASHCO_AREA. Refer to metadata for WASHCO for details.</horizpar>
+			</horizpa>
+		</posacc>
+		<lineage>
+			<procstep>
+				<procdesc>Source type: Derived 1990 01/01/1990 Scale: 1:100000 TIGER Scale: CENSUS Scale: DATA Scale:</procdesc>
+				<procdate>20041117</procdate>
+			</procstep>
+			<procstep>
+				<procdesc>Selected from WASHCO_AREA whenever WASHCO_AREA is updated. WASHCO_AREA was updated by bringing county edges in alignment with CITY_AREA.</procdesc>
+				<procdate>20090501</procdate>
+			</procstep>
+		</lineage>
+	</dataqual>
+	<spdoinfo>
+		<direct>Vector</direct>
+		<ptvctinf>
+			<sdtsterm>
+				<sdtstype>GT-polygon composed of chains</sdtstype>
+				<ptvctcnt>1</ptvctcnt>
+			</sdtsterm>
+		</ptvctinf>
+	</spdoinfo>
+	<eainfo>
+		<detailed>
+			<enttyp>
+				<enttypl>plibrary.POLITICL.kingco_area</enttypl>
+				<enttypd>Polygon featureclass attribute table</enttypd>
+				<enttypds>King County</enttypds>
+			</enttyp>
+			<attr>
+				<attrlabl>COUNTY</attrlabl>
+				<attrdef>Name of a Washington State county</attrdef>
+				<attrdefs>King County</attrdefs>
+				<attrdomv>
+					<udom>Name of county in all uppercase</udom>
+				</attrdomv>
+			</attr>
+			<attr>
+				<attrlabl>OBJECTID</attrlabl>
+				<attrdef>Internal feature number.</attrdef>
+				<attrdefs>ESRI</attrdefs>
+				<attrdomv>
+					<udom>Sequential unique whole numbers that are automatically generated.</udom>
+				</attrdomv>
+			</attr>
+			<attr>
+				<attrlabl>CREATIONDATE</attrlabl>
+				<attrdef>Date and local time feature was created.</attrdef>
+				<attrdefs>King County</attrdefs>
+				<attrdomv>
+					<udom>Date and local time</udom>
+				</attrdomv>
+			</attr>
+			<attr>
+				<attrlabl>EDITDATE</attrlabl>
+				<attrdef>Date and local time feature was edited.</attrdef>
+				<attrdefs>King County</attrdefs>
+				<attrdomv>
+					<udom>Date and local time</udom>
+				</attrdomv>
+			</attr>
+			<attr>
+				<attrlabl>COUNTYLABEL</attrlabl>
+				<attrdef>County name as mixed case for labeling</attrdef>
+				<attrdefs>King County</attrdefs>
+				<attrdomv>
+					<udom>Title format, i.e., Pierce</udom>
+				</attrdomv>
+			</attr>
+			<attr>
+				<attrlabl>SHAPE</attrlabl>
+				<attrdef>Feature geometry.</attrdef>
+				<attrdefs>ESRI</attrdefs>
+				<attrdomv>
+					<udom>Coordinates defining the features.</udom>
+				</attrdomv>
+			</attr>
+			<attr>
+				<attrlabl>SHAPE.STArea()</attrlabl>
+			</attr>
+			<attr>
+				<attrlabl>SHAPE.STLength()</attrlabl>
+			</attr>
+		</detailed>
+		<overview>
+			<eaover>Name of county only</eaover>
+		</overview>
+	</eainfo>
+	<distinfo>
+		<distrib>
+			<cntinfo>
+				<cntorgp>
+					<cntorg>KCGIS Center</cntorg>
+					<cntper>Cheryl Wilder</cntper>
+				</cntorgp>
+				<cntpos>Data Sales Coordinator</cntpos>
+				<cntaddr>
+					<addrtype>mailing and physical</addrtype>
+					<address>201 S Jackson St, Suite 700</address>
+					<city>Seattle</city>
+					<state>WA</state>
+					<postal>98104</postal>
+					<country>US</country>
+				</cntaddr>
+				<cntvoice>206-477-4421</cntvoice>
+			</cntinfo>
+		</distrib>
+		<resdesc>/plibrary2/politicl/shapes/polygon/kingco.shp</resdesc>
+		<distliab>King County disclaims any warranty of use of any digital product or data beyond that for which it was designed.</distliab>
+		<stdorder>
+			<digform>
+				<digtinfo>
+					<formname>ESRI Shapefile</formname>
+				</digtinfo>
+				<digtopt>
+					<onlinopt>
+					</onlinopt>
+				</digtopt>
+			</digform>
+			<fees>Contact KCGIS Client Services for the cost of reproduction - http://www.kingcounty.gov/operations/GIS/GISData/GISDataDistribution.aspx</fees>
+		</stdorder>
+	</distinfo>
+	<metainfo>
+		<metd>20250610</metd>
+		<metc>
+			<cntinfo>
+				<cntorgp>
+					<cntorg>King County GIS Center</cntorg>
+					<cntper>Mike Leathers</cntper>
+				</cntorgp>
+				<cntpos>GIS Data Coordinator</cntpos>
+				<cntaddr>
+					<addrtype>mailing and physical</addrtype>
+					<address>201 S Jackson St, Suite 700</address>
+					<city>Seattle</city>
+					<state>WA</state>
+					<postal>98104</postal>
+					<country>US</country>
+				</cntaddr>
+				<cntvoice>206-477-4403</cntvoice>
+				<cntemail>firstname.lastname@kingcounty.gov</cntemail>
+			</cntinfo>
+		</metc>
+		<metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
+		<metstdv>FGDC-STD-001-1998</metstdv>
+		<mettc>local time</mettc>
+	</metainfo>
+	<Esri><CreaDate>20261015</CreaDate><CreaTime>01153300</CreaTime><ArcGISFormat>1.0</ArcGISFormat><SyncOnce>TRUE</SyncOnce></Esri></metadata>

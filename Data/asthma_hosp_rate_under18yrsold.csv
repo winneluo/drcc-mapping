@@ -1,0 +1,13 @@
+ZIP,period,N,Rate per 10K people,Rate per 100k People,CI Lower,CI Upper,Population,Age,Metric,Condition
+98102,[2017-2021],,,,,,6200,<18,Hospitalizations,Asthma
+98105,[2017-2021],16,7,66.12,33.73,98.50,24200,<18,Hospitalizations,Asthma
+98106,[2017-2021],33,17,165.83,109.30,222.36,19900,<18,Hospitalizations,Asthma
+98107,[2017-2021],,,,,,14500,<18,Hospitalizations,Asthma
+98108,[2017-2021],31,19,185.63,120.34,250.91,16700,<18,Hospitalizations,Asthma
+98116,[2017-2021],12,6,61.54,26.73,96.35,19500,<18,Hospitalizations,Asthma
+98122,[2017-2021],23,16,157.53,93.20,221.87,14600,<18,Hospitalizations,Asthma
+98134,[2017-2021],0,0,0.00,0.00,0.00,400,<18,Hospitalizations,Asthma
+98144,[2017-2021],17,9,87.63,45.99,129.27,19400,<18,Hospitalizations,Asthma
+98168,[2017-2021],33,12,115.38,76.04,154.73,28600,<18,Hospitalizations,Asthma
+98178,[2017-2021],27,19,184.93,115.24,254.62,14600,<18,Hospitalizations,Asthma
+98199,[2017-2021],,,,,,21200,<18,Hospitalizations,Asthma

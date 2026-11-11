@@ -1,0 +1,7 @@
+Tract,Geography Name,Geography,Estimate,Lower CI,Upper CI,Year,Source
+53033010900,Georgetown,Tract 109,72.7,62.1,83.4,2015-2019,Death Certificate
+53033011200,South Park,Tract 112,74.7,71.9,77.6,2015-2019,Death Certificate
+53033010900,Georgetown,Tract 109,67.4,58.4,76.4,2020-2023,Death Certificate
+53033011200,South Park,Tract 112,76.1,72.5,79.7,2020-2023,Death Certificate
+NA,Georgetown & South Park,Tracts 112 & 109,74.3,72.0,76.6,2015-2019,Death Certificate
+NA,Georgetown & South Park,Tracts 112 & 109,74.0,71.2,76.8,2020-2023,Death Certificate
