@@ -12,7 +12,7 @@ This website explores data around the Duwamish River. Use the layer selector to 
 library(sf)
 library(leaflet)
 library(htmlwidgets)
-
+library(dplyr)
 # ---- Load data -------------------------------------------------------------
 map_data    <- readRDS("map_data.rds")
 tracts_local <- readRDS("tracts_local.rds")
